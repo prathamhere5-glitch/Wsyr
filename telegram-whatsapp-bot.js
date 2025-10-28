@@ -5,7 +5,7 @@ const express = require("express");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 
 // === CONFIG ===
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "8111876690:AAETmnCuSI71NXKiCI2VpgtoQiTq5sVliDw";
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
 const PORT = process.env.PORT || 3000;
 
 // === INIT EXPRESS ===
@@ -60,7 +60,7 @@ function initWhatsAppClient(chatId, clientId) {
   client.on("qr", (qr) => {
     console.log("QR RECEIVED");
     qrcode.generate(qr, { small: true });
-    sendPoliteMessage(chatId, "Scan this QR code shown in your terminal ✅");
+    sendPoliteMessage(chatId, "Scan the QR code shown in your terminal ✅");
   });
 
   client.on("ready", () => {
@@ -102,14 +102,54 @@ bot.on("callback_query", async (query) => {
       }
     };
     bot.sendMessage(chatId, "Choose a login method:", addMenu);
-
-  } else if (data === "qr_code") {
+  } 
+  else if (data === "qr_code") {
     sendPoliteMessage(chatId, "Generating QR... please wait ⏳");
     initWhatsAppClient(chatId, `qr_${chatId}`);
-
-  } else if (data === "pairing_code") {
+  } 
+  else if (data === "pairing_code") {
     sendPoliteMessage(chatId, "Pairing via code is currently unavailable on this deployment. Use QR login instead.");
-
-  } else if (data === "list_accounts") {
+  } 
+  else if (data === "list_accounts") {
     const accounts = linkedAccounts[chatId];
-    if (!
+    if (!accounts || Object.keys(accounts).length === 0) {
+      sendPoliteMessage(chatId, "No WhatsApp accounts linked yet ❌");
+    } else {
+      const list = Object.keys(accounts).map((acc, i) => `${i + 1}. ${acc}`).join("\n");
+      sendPoliteMessage(chatId, `📋 Linked Accounts:\n${list}`);
+    }
+  } 
+  else if (data === "start_messaging") {
+    if (Object.keys(clients).length === 0) {
+      sendPoliteMessage(chatId, "No linked accounts. Add one first using ➕ Add Account.");
+      return;
+    }
+    isMessagingActive = true;
+    sendPoliteMessage(chatId, "✅ Messaging started between linked accounts.");
+  } 
+  else if (data === "stop_messaging") {
+    isMessagingActive = false;
+    sendPoliteMessage(chatId, "🛑 Messaging stopped.");
+  } 
+  else if (data === "schedule_message") {
+    sendPoliteMessage(chatId, "⏰ Scheduling feature coming soon!");
+  } 
+  else if (data === "set_delay") {
+    sendPoliteMessage(chatId, "⌛ Delay setting coming soon!");
+  } 
+  else if (data === "back_main") {
+    bot.sendMessage(chatId, "Main Menu:", mainMenu);
+  }
+});
+
+// === TELEGRAM MESSAGE HANDLER ===
+bot.on("message", async (msg) => {
+  const chatId = msg.chat.id;
+  const text = msg.text;
+
+  if (isMessagingActive && clients[chatId]) {
+    const client = clients[chatId];
+    sendPoliteMessage(chatId, `📨 Message sent via WhatsApp: "${text}"`);
+    // Future: route messages between linked accounts here
+  }
+});
