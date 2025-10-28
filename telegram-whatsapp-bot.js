@@ -5,7 +5,7 @@ const express = require("express");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 
 // === CONFIG ===
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || "8111876690:AAETmnCuSI71NXKiCI2VpgtoQiTq5sVliDw";
 const PORT = process.env.PORT || 3000;
 
 // === INIT EXPRESS ===
